@@ -21,3 +21,32 @@ target_link_libraries (${PROJECT_NAME}<br>
  至此开发环境搭建完成。<br>
 代码编写
 ----
+#include <iostream>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/filters/voxel_grid.h>
+int
+main (int argc, char** argv)
+{
+  pcl::PCLPointCloud2::Ptr cloud (new pcl::PCLPointCloud2 ());
+  pcl::PCLPointCloud2::Ptr cloud_filtered (new pcl::PCLPointCloud2 ());
+  // 填入点云数据
+  pcl::PCDReader reader;
+  // 存放点云数据的路径
+  reader.read ("/home/luzh/Downloads/1.pcd", *cloud);
+  std::cerr << "PointCloud before filtering: " << cloud->width * cloud->height 
+       << " data points (" << pcl::getFieldsList (*cloud) << ").";
+  // 创建滤波器对象
+  pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
+  sor.setInputCloud (cloud);
+  sor.setLeafSize (0.01f, 0.01f, 0.01f);// 单位：m
+  sor.filter (*cloud_filtered);
+  std::cerr << "PointCloud after filtering: " << cloud_filtered->width * cloud_filtered->height 
+       << " data points (" << pcl::getFieldsList (*cloud_filtered) << ").";
+  pcl::PCDWriter writer;
+//自定义文件名输出
+  writer.write ("table_scene_lms400_downsampled.pcd", *cloud_filtered, 
+         Eigen::Vector4f::Zero (), Eigen::Quaternionf::Identity (), false);
+  return (0);
+}
+     
